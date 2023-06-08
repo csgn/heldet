@@ -1,11 +1,9 @@
 import cv2
 import numpy as np
 
-
 from flask import Flask, Response, render_template, request
 from source import Source
-from yolo import load_model, check_img_size
-from sahi.predict import get_sliced_prediction
+from yolo import load_model
 
 
 app = Flask(__name__)
@@ -20,20 +18,12 @@ def gen(inference, source, size):
         success, frame = next(source.frames())
         if success:
             if inference > 0:
-                #frame = yolo(frame, size)
-                #frame = np.squeeze(frame.render())
-                result = get_sliced_prediction(
-                    frame,
-                    yolo,
-                    slice_height = 256,
-                    slice_width = 256,
-                    overlap_height_ratio = 0.2,
-                    overlap_width_ratio = 0.2
-                )
-                img_arr = np.array(result.image)
-                _, encoded_frame = cv2.imencode('.jpg', img_arr)
-                yield (b'--frame\r\n'
-                    b'Content-Type: image/jpeg\r\n\r\n' + encoded_frame.tobytes() + b'\r\n')
+                frame = yolo(frame, size)
+                frame = np.squeeze(frame.render())
+
+            _, encoded_frame = cv2.imencode('.jpg', frame)
+            yield (b'--frame\r\n'
+                b'Content-Type: image/jpeg\r\n\r\n' + encoded_frame.tobytes() + b'\r\n')
 
     del source
 
