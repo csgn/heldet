@@ -8,22 +8,29 @@ from yolo import load_model
 app = Flask(__name__)
 yolo = load_model()
 
-def gen(inference, source):
+def gen(inference, source, size):
+    size = (size, size)
     while True:
         success, frame = next(source.frames())
         if success:
             if inference > 0:
-                frame = yolo(frame)
+                frame = yolo(frame, size)
                 frame = np.squeeze(frame.render())
 
             _, encoded_frame = cv2.imencode('.jpg', frame)
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + encoded_frame.tobytes() + b'\r\n')
 
-@app.route('/feed/<inference>/<path:source_url>', methods=['GET'])
-def video_feed(inference=0, source_url=0):
-    return Response(gen(int(inference), Source(source_url)), 
-                    mimetype='multipart/x-mixed-replace; boundary=frame')
+    del source
+
+@app.route('/feed/<inference>/<int:size>/<path:source_url>', methods=['GET'])
+def video_feed(inference=0, size=640, source_url=0):
+    try:
+        return Response(gen(int(inference), Source(source_url), size), 
+                        200,
+                        mimetype='multipart/x-mixed-replace; boundary=frame')
+    except Exception as e:
+        return Response(str(e), 500)
 
 @app.route('/', methods=['GET'])
 def index():
