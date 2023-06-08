@@ -3,18 +3,22 @@ import numpy as np
 
 from flask import Flask, Response, render_template, request
 from source import Source
-from yolo import load_model
+from yolo import load_model, check_img_size
+
 
 app = Flask(__name__)
 yolo = load_model()
 
 def gen(inference, source, size):
     size = (size, size)
+    stride, names, pt = yolo.stride, yolo.names, yolo.pt
+    imgsz = check_img_size(size, s=stride)
+
     while True:
         success, frame = next(source.frames())
         if success:
             if inference > 0:
-                frame = yolo(frame, size)
+                frame = yolo(frame, imgsz)
                 frame = np.squeeze(frame.render())
 
             _, encoded_frame = cv2.imencode('.jpg', frame)
