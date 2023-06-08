@@ -16,6 +16,9 @@ $ python feed.py
 
 - open `http://localhost:5000` on browser
 - `http://localhost:5000/feed/<inference>/<imgsz>/<source_url>`
+  - `inference`: `0` or `1`, `0` is normal frame, `1` is inferenced
+  - `imgsz`: `256`, `416`, `640`, `1024` etc.
+  - `source_url`: `0`, `http://192.168.1.10:8080/video`, `file://.../test.mp4`
 - from webcam
 
   - normal frame from webcam
