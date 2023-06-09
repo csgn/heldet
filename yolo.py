@@ -2,12 +2,11 @@ import os
 import torch
 import math
 
-from ultralyticsplus import YOLO
 
-MODEL_YOLOV = 'WangRongsheng/BestYOLO'
+MODEL_YOLOV = 'ultralytics/yolov5'
 MODEL_TYPE = 'custom'
-MODEL_PATH = 'models/hardhat.pt'
-MODEL_CONF = 0.5
+MODEL_PATH = 'models/best.pt'
+MODEL_CONF = 0.25
 MODEL_IOU = 0.5
 MODEL_IMGSZ = (640, 640)
 
@@ -28,19 +27,11 @@ def check_img_size(imgsz, s=32, floor=0):
     return new_size
 
 def load_model():
-    # model = torch.hub.load(MODEL_YOLOV,
-    #                        MODEL_TYPE,
-    #                        MODEL_PATH,
-    #                        force_reload=True)
-    # model.conf = MODEL_CONF
-    # model.iou = MODEL_IOU
-
-    # return model
-    model = YOLO('keremberke/yolov8m-hard-hat-detection')
-    model.overrides['conf'] = 0.25  # NMS confidence threshold
-    model.overrides['iou'] = 0.45  # NMS IoU threshold
-    model.overrides['agnostic_nms'] = False  # NMS class-agnostic
-    model.overrides['max_det'] = 1000  # maximum number of detections per image
-
+    model = torch.hub.load(MODEL_YOLOV,
+                           MODEL_TYPE,
+                           MODEL_PATH,
+                           force_reload=True)
+    model.conf = MODEL_CONF
+    model.iou = MODEL_IOU
 
     return model

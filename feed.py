@@ -5,26 +5,20 @@ from flask import Flask, Response, render_template, request
 from source import Source
 from yolo import load_model
 
-from ultralyticsplus import render_result
-
-
 app = Flask(__name__)
 yolo = load_model()
 
 def gen(inference, source, size):
     size = (size, size)
-    #stride, names, pt = yolo.stride, yolo.names, yolo.pt
-    #imgsz = check_img_size(size, s=stride)
-
     while True:
         success, frame = next(source.frames())
         if success:
             if inference > 0:
-                result = yolo.predict(frame)
-                rnd = render_result(image=frame, model=yolo, result=result[0])
-                frame = np.squeeze(np.array(rnd))
+                results = yolo(frame)
+                frame = np.squeeze(results.render())
 
             _, encoded_frame = cv2.imencode('.jpg', frame)
+
             yield (b'--frame\r\n'
                 b'Content-Type: image/jpeg\r\n\r\n' + encoded_frame.tobytes() + b'\r\n')
 
